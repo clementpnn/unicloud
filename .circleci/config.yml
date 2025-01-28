@@ -1,0 +1,138 @@
+version: 2.1
+
+# (Facultatif) On peut retirer la section "orbs" si on n'utilise pas
+# de "node: circleci/node@..." plus loin.
+# orbs:
+#   node: circleci/node@5
+
+jobs:
+  # =====================
+  #  JOB: build-node
+  # =====================
+  build-node:
+    # On utilise une image Docker CircleCI pour Node
+    docker:
+      - image: cimg/node:16.20 # ou 18.16, 20.3, etc.
+    working_directory: ~/project/apps/frontend
+    steps:
+      - checkout:
+          path: ~/project
+
+      # Installe pnpm via Corepack ou en direct
+      - run:
+          name: Install pnpm
+          command: |
+            corepack enable
+            corepack prepare pnpm@latest --activate
+
+      # Installation des dépendances frontend
+      - run:
+          name: Install dependencies
+          command: |
+            pnpm install
+
+      # Build du projet React
+      - run:
+          name: Build
+          command: |
+            pnpm run build
+
+      # Prépare un répertoire artifacts
+      - run:
+          name: Create artifacts directory
+          command: mkdir -p ~/artifacts
+
+      # Copie les répertoires de build vers ~/artifacts
+      - run:
+          name: Copy artifacts
+          command: |
+            cp -R build dist public .output .next .docusaurus ~/artifacts 2>/dev/null || true
+
+      # Stocke les artefacts pour consultation ultérieure
+      - store_artifacts:
+          path: ~/artifacts
+          destination: node-build
+
+  # =====================
+  #  JOB: test-go
+  # =====================
+  test-go:
+    docker:
+      - image: cimg/go:1.20
+    working_directory: ~/project/apps/backend
+    steps:
+      - checkout:
+          path: ~/project
+
+      # Restaure un cache potentiel pour accélérer la récup des modules Go
+      - restore_cache:
+          key: go-mod-{{ checksum "go.sum" }}
+
+      - run:
+          name: Download Go modules
+          command: go mod download
+
+      # On peut utiliser 'gotestsum' si on le souhaite, sinon un simple go test -v
+      - run:
+          name: Run tests
+          command: |
+            go test -v ./test/...
+
+      # Sauvegarde les résultats de tests en JUnit si besoin
+      - store_test_results:
+          path: junit.xml
+
+      - save_cache:
+          key: go-mod-{{ checksum "go.sum" }}
+          paths:
+            - /home/circleci/go/pkg/mod
+
+  # =====================
+  #  JOB: build-go-executables
+  # =====================
+  build-go-executables:
+    docker:
+      - image: cimg/go:1.20
+    working_directory: ~/project/apps/backend
+    steps:
+      - checkout:
+          path: ~/project
+
+      - restore_cache:
+          key: go-mod-{{ checksum "go.sum" }}
+
+      - run:
+          name: Download Go modules
+          command: go mod download
+
+      - run:
+          name: Create artifacts dir
+          command: mkdir -p ~/artifacts
+
+      - run:
+          name: Build executables
+          command: |
+            # Exemple : build d'un binaire principal
+            # Si tu veux builder tous les *.go, tu peux faire go build ./...
+            go build -o ~/artifacts/my-api main.go
+
+      - store_artifacts:
+          path: ~/artifacts
+          destination: executables
+
+workflows:
+  build-and-test:
+    jobs:
+      - test-go
+      - build-node:
+          requires:
+            - test-go
+      - build-go-executables:
+          requires:
+            - test-go
+
+    # Tu peux ajouter un job de déploiement après build si tu veux
+    # - deploy:
+    #     requires:
+    #       - build-node
+    #       - build-go-executables
