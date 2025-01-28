@@ -29,8 +29,9 @@ export default function LinkForm() {
   const { mutate, data, isError, error, status } = useLinkService()
 
   useEffect(() => {
-    if (status === "success") {
-      setLink(data?.link)
+    if (status === "success" && data) {
+      const shortUrl = `http://localhost:3000/${data.short_url}`
+      setLink(shortUrl)
       setIsOpen(true)
     }
 
