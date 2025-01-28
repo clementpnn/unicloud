@@ -1,9 +1,9 @@
-output "fr_instance_public_ip" {
-  description = "Adresse IP publique de l'instance en France"
-  value       = google_compute_instance.instance_fr.network_interface[0].access_config[0].nat_ip
+output "frontend_fr_lb_ip" {
+  description = "IP publique du frontend FR"
+  value       = kubernetes_service.front_fr_svc.status[0].load_balancer_ingress[0].ip
 }
 
-output "de_instance_public_ip" {
-  description = "Adresse IP publique de l'instance en Allemagne"
-  value       = google_compute_instance.instance_de.network_interface[0].access_config[0].nat_ip
+output "frontend_de_lb_ip" {
+  description = "IP publique du frontend DE"
+  value       = kubernetes_service.front_de_svc.status[0].load_balancer_ingress[0].ip
 }
