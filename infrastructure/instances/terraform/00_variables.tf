@@ -4,16 +4,16 @@ variable "project_id" {
   default     = "axial-reference-447820-m6"
 }
 
+variable "default_region" {
+  type        = string
+  description = "Région par défaut GCP"
+  default     = "europe-west9"
+}
+
 variable "region_fr" {
   description = "Région GCP pour la France"
   type        = string
   default     = "europe-west9"
-}
-
-variable "zone_fr" {
-  description = "Zone GCP pour la France"
-  type        = string
-  default     = "europe-west9-b"
 }
 
 variable "region_de" {
@@ -22,46 +22,14 @@ variable "region_de" {
   default     = "europe-west3"
 }
 
-variable "zone_de" {
-  description = "Zone GCP pour l'Allemagne"
-  type        = string
-  default     = "europe-west3-a"
-}
-
 variable "machine_type" {
-  description = "Type de machine (équivalent instance_type sur AWS)"
-  type        = string
-  default     = "e2-micro"
+  type    = string
+  default = "e2-small"
 }
 
-variable "vpc_name" {
-  description = "Nom du VPC"
-  type        = string
-  default     = "multi-region-vpc"
-}
-
-variable "vpc_cidr" {
-  description = "CIDR global du VPC"
-  type        = string
-  default     = "10.0.0.0/16"
-}
-
-variable "subnet_cidr_fr" {
-  description = "CIDR pour le subnet en France"
-  type        = string
-  default     = "10.0.1.0/24"
-}
-
-variable "subnet_cidr_de" {
-  description = "CIDR pour le subnet en Allemagne"
-  type        = string
-  default     = "10.0.2.0/24"
-}
-
-variable "ssh_public_key" {
-  description = "Contenu de la clé publique SSH"
-  type        = string
-  sensitive   = true
+variable "node_count" {
+  type    = number
+  default = 1
 }
 
 variable "ansible_user" {
