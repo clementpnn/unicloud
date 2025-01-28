@@ -1,0 +1,13 @@
+linters-settings:
+  errcheck:
+    check-type-assertions: true
+
+linters:
+  enable:
+    - govet
+    - errcheck
+    - staticcheck
+    - unused
+    - gosec
+    - gofmt
+    - goimports

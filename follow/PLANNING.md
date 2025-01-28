@@ -2,7 +2,7 @@
 
 ## Jour 1 (Conception)
 
-- Choix desrôles
+- Choix des rôles
 - Création de l'app
 - Planification et standards techniques
 (RGPD, haute dispo, rétroplanning, documentation)
