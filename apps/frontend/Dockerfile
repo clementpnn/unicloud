@@ -6,11 +6,11 @@ RUN apk add --no-cache curl && \
 
 WORKDIR /app
 
-COPY pnpm-lock.yaml package.json ./
+COPY ./apps/frontend/pnpm-lock.yaml ./apps/frontend/package.json ./
 
 RUN pnpm install
 
-COPY . .
+COPY ./apps/frontend ./
 
 RUN pnpm build
 
