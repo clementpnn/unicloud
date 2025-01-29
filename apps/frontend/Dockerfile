@@ -1,8 +1,6 @@
 FROM ubuntu:latest as builder
 
-RUN apk add --no-cache curl && \
-  corepack enable && \
-  corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
 WORKDIR /app
 
