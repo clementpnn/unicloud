@@ -1,6 +1,6 @@
-FROM ubuntu:latest as builder
+FROM node:20-alpine as builder
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN npm install -g pnpm
 
 WORKDIR /app
 

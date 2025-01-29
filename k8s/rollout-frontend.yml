@@ -23,6 +23,6 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: ghcr.io/clementpnn/devops-projectfrontend:main
+          image: ghcr.io/clementpnn/devops-projectfrontend:latest
           ports:
             - containerPort: 80
