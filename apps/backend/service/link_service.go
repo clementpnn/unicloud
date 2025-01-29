@@ -10,15 +10,20 @@ import (
 	"github.com/google/uuid"
 )
 
-type LinkService struct {
+type LinkService interface {
+	CreateShortURL(longURL string) (*model.Link, error)
+	GetByShortURL(shortURL string) (*model.Link, error)
+}
+
+type LinkServiceImpl struct {
 	repo *repository.LinkRepository
 }
 
-func NewLinkService(repo *repository.LinkRepository) *LinkService {
-	return &LinkService{repo: repo}
+func NewLinkService(repo *repository.LinkRepository) *LinkServiceImpl {
+	return &LinkServiceImpl{repo: repo}
 }
 
-func (s *LinkService) CreateShortURL(longURL string) (*model.Link, error) {
+func (s *LinkServiceImpl) CreateShortURL(longURL string) (*model.Link, error) {
 	shortURL, err := generateShortURL()
 	if err != nil {
 		return nil, err
@@ -47,6 +52,6 @@ func generateShortURL() (string, error) {
 	return base64.URLEncoding.EncodeToString(b)[:8], nil
 }
 
-func (s *LinkService) GetByShortURL(shortURL string) (*model.Link, error) {
+func (s *LinkServiceImpl) GetByShortURL(shortURL string) (*model.Link, error) {
 	return s.repo.GetByShortURL(shortURL)
 }
