@@ -1,4 +1,4 @@
-package repository_test
+package test
 
 import (
 	"backend/domain/model"

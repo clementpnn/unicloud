@@ -21,11 +21,13 @@ func ConnectDB() *sql.DB {
 	log.Printf("DB_NAME: %s", os.Getenv("DB_NAME"))
 
 	connStr := fmt.Sprintf(
-		"postgresql://%s:%s@%s:%s/postgres?sslmode=disable&TimeZone=Europe/Paris",
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_PORT"),
 		os.Getenv("DB_USER"),
 		os.Getenv("DB_PASSWORD"),
-		os.Getenv("DB_HOST"),
-		os.Getenv("DB_PORT"))
+		os.Getenv("DB_NAME"),
+	)
 
 	log.Printf("Connection string: %s", connStr)
 
@@ -41,7 +43,7 @@ func ConnectDB() *sql.DB {
 	return db
 }
 
-func getEnv(key, defaultValue string) string {
+func GetEnv(key, defaultValue string) string {
 	value := os.Getenv(key)
 	if value == "" {
 		return defaultValue
