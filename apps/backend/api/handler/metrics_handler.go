@@ -28,8 +28,6 @@ func HandleErrorMetric(c *fiber.Ctx) error {
 			"error": "Invalid metric data",
 		})
 	}
-
-	// Incrémente le compteur d'erreurs avec les labels appropriés
 	errorCounter.WithLabelValues(metric.ErrorType, metric.Context).Inc()
 
 	return c.SendStatus(fiber.StatusOK)

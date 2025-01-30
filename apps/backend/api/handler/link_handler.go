@@ -2,7 +2,6 @@ package handler
 
 import (
 	"backend/service"
-	"log"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -26,7 +25,6 @@ func NewLinkHandler(linkService *service.LinkService) *LinkHandler {
 func (h *LinkHandler) CreateShortURL(c *fiber.Ctx) error {
 	var req CreateLinkRequest
 	if err := c.BodyParser(&req); err != nil {
-		log.Printf("Erreur de parsing: %v", err)
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid input",
 		})
@@ -34,7 +32,6 @@ func (h *LinkHandler) CreateShortURL(c *fiber.Ctx) error {
 
 	link, err := h.linkService.CreateShortURL(req.URL)
 	if err != nil {
-		log.Printf("Erreur de création: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
 		})
@@ -46,17 +43,15 @@ func (h *LinkHandler) CreateShortURL(c *fiber.Ctx) error {
 func (h *LinkHandler) RedirectToURL(c *fiber.Ctx) error {
 	shortURL := c.Params("shortURL")
 
-	log.Printf("Trying to redirect shortURL: %s", shortURL)
-
-	link, err := h.linkService.GetByShortURL(shortURL)
+	originalURL, err := h.linkService.GetOriginalURL(shortURL)
 	if err != nil {
-		log.Printf("Error finding URL: %v", err)
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error": "URL not found",
 		})
 	}
 
-	return c.Redirect(link.LongURL, fiber.StatusMovedPermanently)
+
+	return c.Redirect(originalURL, fiber.StatusTemporaryRedirect)
 }
 
 type CreateLinkRequest struct {

@@ -6,7 +6,9 @@ import (
 	"backend/middleware"
 	"backend/repository"
 	"backend/service"
-	"log"
+	"net"
+	"strconv"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/adaptor"
@@ -19,16 +21,27 @@ func main() {
 	db := database.ConnectDB()
 	defer db.Close()
 
-	app := fiber.New()
+	app := fiber.New(fiber.Config{
+		EnableTrustedProxyCheck: false,
+	})
 
 	app.Use(middleware.PrometheusMiddleware())
 	app.Get("/metrics", adaptor.HTTPHandler(promhttp.Handler()))
 
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: "http://localhost:5173",
-		AllowHeaders: "Origin, Content-Type, Accept, Authorization",
-		AllowMethods: "GET,POST,HEAD,PUT,DELETE,PATCH",
+		Next:             nil,
+		AllowOrigins:     "http://localhost:5173",
+		AllowMethods:     "GET,POST,HEAD,OPTIONS,PUT,DELETE,PATCH",
+		AllowHeaders:     "*",
+		AllowCredentials: true,
+		ExposeHeaders:    "",
+		MaxAge:           0,
 	}))
+
+	app.Use(func(c *fiber.Ctx) error {
+		return c.Next()
+	})
+
 	app.Use(recover.New())
 
 	linkRepo := repository.NewLinkRepository(db)
@@ -40,5 +53,20 @@ func main() {
 	api.Post("/metrics/error", handler.HandleErrorMetric)
 	app.Get("/:shortURL", linkHandler.RedirectToURL)
 
-	log.Fatal(app.Listen(":3000"))
+	port := "3001"
+	for i := 0; i < 10; i++ {
+		listener, err := net.Listen("tcp", ":"+port)
+		if err != nil {
+			if strings.Contains(err.Error(), "address already in use") {
+				portNum, _ := strconv.Atoi(port)
+				port = strconv.Itoa(portNum + 1)
+				continue
+			}
+		}
+		listener.Close()
+		break
+	}
+
+	if err := app.Listen(":" + port); err != nil {
+	}
 }

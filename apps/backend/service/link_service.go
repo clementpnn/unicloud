@@ -6,7 +6,6 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"time"
-
 	"github.com/google/uuid"
 )
 
@@ -49,4 +48,14 @@ func generateShortURL() (string, error) {
 
 func (s *LinkService) GetByShortURL(shortURL string) (*model.Link, error) {
 	return s.repo.GetByShortURL(shortURL)
+}
+
+func (s *LinkService) GetOriginalURL(shortURL string) (string, error) {
+
+	originalURL, err := s.repo.GetOriginalURL(shortURL)
+	if err != nil {
+		return "", err
+	}
+
+	return originalURL, nil
 }

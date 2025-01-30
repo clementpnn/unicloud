@@ -3,6 +3,17 @@ package repository
 import (
 	"backend/domain/model"
 	"database/sql"
+	"fmt"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+)
+
+var (
+	linkCreationCounter = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "link_creation_total",
+		Help: "Total number of created links",
+	})
 )
 
 type LinkRepository struct {
@@ -35,4 +46,34 @@ func (r *LinkRepository) GetByShortURL(shortURL string) (*model.Link, error) {
 		return nil, err
 	}
 	return link, nil
+}
+
+func (r *LinkRepository) CreateShortURL(url string) (*model.Link, error) {
+	link := &model.Link{}
+	linkCreationCounter.Inc()
+
+	return link, nil
+}
+
+func (r *LinkRepository) GetOriginalURL(shortURL string) (string, error) {
+	var originalURL string
+
+	query := `
+        SELECT long_url 
+        FROM links 
+        WHERE short_url = $1
+        LIMIT 1
+    `
+
+	err := r.db.QueryRow(query, shortURL).Scan(&originalURL)
+
+	if err == sql.ErrNoRows {
+		return "", fmt.Errorf("URL not found")
+	}
+
+	if err != nil {
+		return "", fmt.Errorf("database error: %v", err)
+	}
+
+	return originalURL, nil
 }
