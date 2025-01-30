@@ -28,7 +28,7 @@ jobs:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
 
       - name: Authenticate Docker with Artifact Registry
-        run: gcloud auth configure-docker ${{ env.GCP_REGION_DEV }}-docker.pkg.dev ${{ env.GCP_REGION_PROD }}-docker.pkg.dev
+        run: gcloud auth configure-docker --quiet
 
       - name: Extract version from tag
         id: extract_version
