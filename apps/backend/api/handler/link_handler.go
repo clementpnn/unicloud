@@ -26,6 +26,7 @@ func NewLinkHandler(linkService *service.LinkService) *LinkHandler {
 func (h *LinkHandler) CreateShortURL(c *fiber.Ctx) error {
 	var req CreateLinkRequest
 	if err := c.BodyParser(&req); err != nil {
+		log.Printf("Erreur de parsing: %v", err)
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid input",
 		})
@@ -33,6 +34,7 @@ func (h *LinkHandler) CreateShortURL(c *fiber.Ctx) error {
 
 	link, err := h.linkService.CreateShortURL(req.URL)
 	if err != nil {
+		log.Printf("Erreur de création: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
 		})
