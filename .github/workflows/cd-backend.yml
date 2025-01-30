@@ -7,10 +7,10 @@ on:
 
 env:
   GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  GCP_REGION_DEV: europe-west3 # Allemagne
-  GCP_REGION_PROD: europe-west9 # France
-  SERVICE_NAME: my-cloud-run-app
-  REPO_NAME: my-artifact-repo # Nom du repo Artifact Registry
+  GCP_REGION_DEV: europe-west3
+  GCP_REGION_PROD: europe-west9
+  SERVICE_NAME: devopv-backend
+  REPO_NAME: devopv-artifact-repo
   DOCKERFILE_PATH: ./apps/backend/Dockerfile
 
 jobs:
