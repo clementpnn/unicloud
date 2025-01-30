@@ -43,7 +43,7 @@ jobs:
 
       - name: Build Docker image from backend
         run: |
-          docker build -t ${{ env.DEPLOY_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.SERVICE_NAME }}:${{ env.TAG }} -f ${{ env.DOCKERFILE_PATH }} .
+          docker build -t ${{ env.DEPLOY_REGION }}-docker.pkg.dev${{ env.GCP_PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.SERVICE_NAME }}:${{ env.TAG }} -f ${{ env.DOCKERFILE_PATH }} .
 
       - name: Push Docker image to Artifact Registry
         run: |
