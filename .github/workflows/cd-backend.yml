@@ -78,8 +78,8 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ env.SSH_HOST }}
-          username: ${{ env.SSH_USERNAME }}
-          key: ${{ env.SSH_KEY }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
           script: |
             echo "${{ secrets.GITHUB_TOKEN }}" | sudo docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
             sudo docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
