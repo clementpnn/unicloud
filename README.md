@@ -8,14 +8,14 @@
 </p>
 
 <p align="center">
-  <a href="#Terraform-&-Ansible-GCP-Project"><strong>Terraform & Ansible GCP Project</strong></a> ·
+  <a href="#introduction"><strong>Introduction</strong></a> ·
   <a href="#project-structure"><strong>Project Structure</strong></a> ·
   <a href="#Makefile-Usage"><strong>Makefile Usage</strong></a> ·
   <a href="#Connecting-to-the-Server-from-Your-Terminal"><strong>Connecting to the Server from Your Terminal</strong></a>
 </p>
 <br/>
 
-# Terraform & Ansible GCP Project
+## Introduction
 
 This project utilizes **Terraform** to deploy an E2 instance on GCP, followed by **Ansible** to configure the instance by installing Docker using the ```geerlingguy.docker``` Ansible role. A **Makefile** is included to simplify common Terraform commands.
 
