@@ -77,7 +77,7 @@ jobs:
       - name: Deploy a new image
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ env.SSH_HOST }}
+          host: ${{ secrets.SSH_HOST }}
           username: ${{ env.SSH_USERNAME }}
           key: ${{ env.SSH_KEY }}
           script: |
