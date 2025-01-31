@@ -22,12 +22,23 @@ var _ service.LinkService = (*MockLinkService)(nil)
 
 func (m *MockLinkService) CreateShortURL(longURL string) (*model.Link, error) {
 	args := m.Called(longURL)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
 	return args.Get(0).(*model.Link), args.Error(1)
 }
 
 func (m *MockLinkService) GetByShortURL(shortURL string) (*model.Link, error) {
 	args := m.Called(shortURL)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
 	return args.Get(0).(*model.Link), args.Error(1)
+}
+
+func (m *MockLinkService) GetOriginalURL(shortURL string) (string, error) {
+	args := m.Called(shortURL)
+	return args.String(0), args.Error(1)
 }
 
 func TestCreateShortURL(t *testing.T) {
