@@ -57,7 +57,7 @@ jobs:
         run: pnpm install
 
       - name: TypeScript
-        run: pnpm type
+        run: pnpm type-check
 
   test:
     name: Test

@@ -42,16 +42,13 @@ jobs:
         id: target
         run: |
           TAG_NAME="${{ github.ref_name }}"
+          echo "TAG_NAME=${TAG_NAME}"
           if [[ "$TAG_NAME" == *"-dev" ]]; then
             echo "DEPLOY_ENV=dev" >> $GITHUB_ENV
             echo "SSH_HOST=${{ secrets.SSH_HOST_DE }}" >> $GITHUB_ENV
-            echo "SSH_USERNAME=${{ secrets.SSH_USERNAME }}" >> $GITHUB_ENV
-            echo "SSH_KEY=${{ secrets.SSH_KEY }}" >> $GITHUB_ENV
           else
             echo "DEPLOY_ENV=prod" >> $GITHUB_ENV
             echo "SSH_HOST=${{ secrets.SSH_HOST_FR }}" >> $GITHUB_ENV
-            echo "SSH_USERNAME=${{ secrets.SSH_USERNAME }}" >> $GITHUB_ENV
-            echo "SSH_KEY=${{ secrets.SSH_KEY }}" >> $GITHUB_ENV
           fi
 
       - name: Prepare metadata
