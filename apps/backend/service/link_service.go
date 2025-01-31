@@ -13,13 +13,14 @@ import (
 type LinkService interface {
 	CreateShortURL(longURL string) (*model.Link, error)
 	GetByShortURL(shortURL string) (*model.Link, error)
+	GetOriginalURL(shortURL string) (string, error)
 }
 
 type LinkServiceImpl struct {
 	repo *repository.LinkRepository
 }
 
-func NewLinkService(repo *repository.LinkRepository) *LinkServiceImpl {
+func NewLinkService(repo *repository.LinkRepository) LinkService {
 	return &LinkServiceImpl{repo: repo}
 }
 
@@ -54,4 +55,12 @@ func generateShortURL() (string, error) {
 
 func (s *LinkServiceImpl) GetByShortURL(shortURL string) (*model.Link, error) {
 	return s.repo.GetByShortURL(shortURL)
+}
+
+func (s *LinkServiceImpl) GetOriginalURL(shortURL string) (string, error) {
+	link, err := s.repo.GetByShortURL(shortURL)
+	if err != nil {
+		return "", err
+	}
+	return link.LongURL, nil
 }

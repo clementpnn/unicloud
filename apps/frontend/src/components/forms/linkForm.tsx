@@ -30,7 +30,7 @@ export default function LinkForm() {
 
   useEffect(() => {
     if (status === "success" && data) {
-      const shortUrl = `http://localhost:3000/${data.short_url}`
+      const shortUrl = `http://localhost:3001/${data.short_url}`
       setLink(shortUrl)
       setIsOpen(true)
     }

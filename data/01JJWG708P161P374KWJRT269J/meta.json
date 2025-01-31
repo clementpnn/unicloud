@@ -1,0 +1,17 @@
+{
+	"ulid": "01JJWG708P161P374KWJRT269J",
+	"minTime": 1738260000000,
+	"maxTime": 1738267200000,
+	"stats": {
+		"numSamples": 332022,
+		"numSeries": 2686,
+		"numChunks": 2695
+	},
+	"compaction": {
+		"level": 1,
+		"sources": [
+			"01JJWG708P161P374KWJRT269J"
+		]
+	},
+	"version": 1
+}
