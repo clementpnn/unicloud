@@ -1,4 +1,4 @@
-name: CI Web
+name: CI FRONTEND
 
 on:
   push:
@@ -84,7 +84,7 @@ jobs:
         run: pnpm install
 
       - name: Test
-        run: pnpm test
+        run: pnpm tests-e2e
 
   build:
     name: Build
