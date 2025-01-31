@@ -4,7 +4,6 @@ import (
 	"backend/domain/model"
 	"database/sql"
 	"fmt"
-
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
