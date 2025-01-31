@@ -1,4 +1,4 @@
-name: CD Frontend - Deploy to GCP Artifact Registry & Cloud Run
+name: CD FRONTEND
 
 on:
   push:
@@ -6,64 +6,84 @@ on:
       - "v*.*.*"
 
 env:
-  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  GCP_REGION_DEV: europe-west3
-  GCP_REGION_PROD: europe-west9
-  SERVICE_NAME: devopv-frontend
-  REPO_NAME: devopv-artifact-repo
-  DOCKERFILE_PATH: ./apps/frontend/Dockerfile
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}-frontend
 
 jobs:
-  build-and-push:
-    name: Build & Push Docker Image to Artifact Registry
+  deploy:
+    name: Deploy
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    defaults:
+      run:
+        shell: bash
+        working-directory: apps/frontend
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v1
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to GitHub Packages
+        uses: docker/login-action@v2
         with:
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Authenticate Docker with Artifact Registry
-        run: gcloud auth configure-docker ${{ env.GCP_REGION_DEV }}-docker.pkg.dev ${{ env.GCP_REGION_PROD }}-docker.pkg.dev
-
-      - name: Extract version from tag
-        id: extract_version
+      - name: Determine Deployment Target
+        id: target
         run: |
-          TAG_NAME="${GITHUB_REF#refs/tags/}"
-          echo "TAG=$TAG_NAME" >> $GITHUB_ENV
+          TAG_NAME="${{ github.ref_name }}"
           if [[ "$TAG_NAME" == *"-dev" ]]; then
-            echo "DEPLOY_REGION=${{ env.GCP_REGION_DEV }}" >> $GITHUB_ENV
+            echo "DEPLOY_ENV=dev" >> $GITHUB_ENV
+            echo "SSH_HOST=${{ secrets.SSH_HOST_DE }}" >> $GITHUB_ENV
+            echo "SSH_USERNAME=${{ secrets.SSH_USERNAME }}" >> $GITHUB_ENV
+            echo "SSH_KEY=${{ secrets.SSH_KEY }}" >> $GITHUB_ENV
           else
-            echo "DEPLOY_REGION=${{ env.GCP_REGION_PROD }}" >> $GITHUB_ENV
+            echo "DEPLOY_ENV=prod" >> $GITHUB_ENV
+            echo "SSH_HOST=${{ secrets.SSH_HOST_FR }}" >> $GITHUB_ENV
+            echo "SSH_USERNAME=${{ secrets.SSH_USERNAME }}" >> $GITHUB_ENV
+            echo "SSH_KEY=${{ secrets.SSH_KEY }}" >> $GITHUB_ENV
           fi
 
-      - name: Build Docker image from frontend
-        run: |
-          docker build -t ${{ env.DEPLOY_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.SERVICE_NAME }}:${{ env.TAG }} -f ${{ env.DOCKERFILE_PATH }} .
-
-      - name: Push Docker image to Artifact Registry
-        run: |
-          docker push ${{ env.DEPLOY_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.SERVICE_NAME }}:${{ env.TAG }}
-
-  deploy:
-    name: Deploy to Cloud Run
-    runs-on: ubuntu-latest
-    needs: build-and-push
-    steps:
-      - name: Set up Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v1
+      - name: Prepare metadata
+        id: meta
+        uses: docker/metadata-action@v3
         with:
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=ref,event=tag
 
-      - name: Deploy to Cloud Run
-        run: |
-          gcloud run deploy ${{ env.SERVICE_NAME }} \
-            --image ${{ env.DEPLOY_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.SERVICE_NAME }}:${{ env.TAG }} \
-            --region ${{ env.DEPLOY_REGION }} \
-            --platform managed \
-            --allow-unauthenticated
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          file: ./apps/frontend/Dockerfile
+          build-args: |
+            APP_RELEASE=${{ github.sha }}
+          push: true
+          tags: |
+            ${{ steps.meta.outputs.tags }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Deploy a new image
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ env.SSH_HOST }}
+          username: ${{ env.SSH_USERNAME }}
+          key: ${{ env.SSH_KEY }}
+          script: |
+            echo "${{ secrets.GITHUB_TOKEN }}" | sudo docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+            sudo docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            sudo docker compose up -d --force-recreate --remove-orphans frontend
