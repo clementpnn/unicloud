@@ -1,4 +1,4 @@
-TERRAFORM_DIR := ./terraform
+TERRAFORM_DIR := .infrastructure/terraform
 
 .PHONY: all init apply destroy
 
