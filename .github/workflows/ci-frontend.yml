@@ -1,0 +1,120 @@
+name: CI FRONTEND
+
+on:
+  push:
+    paths:
+      - "apps/frontend/**"
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: apps/frontend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "18"
+
+      - name: Install dependencies
+        run: npm install -g pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Lint
+        run: pnpm lint
+
+  typescript:
+    name: TypeScript
+    runs-on: ubuntu-latest
+    needs: lint
+    defaults:
+      run:
+        shell: bash
+        working-directory: apps/frontend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "18"
+
+      - name: Install dependencies
+        run: npm install -g pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: TypeScript
+        run: pnpm type-check
+
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libasound2 libicu-dev libffi-dev libx264-dev
+
+      - name: Install dependencies
+        run: npm install -g pnpm && pnpm install
+        working-directory: apps/frontend
+
+      - name: Install Playwright Browsers
+        run: pnpm exec playwright install --with-deps
+        working-directory: apps/frontend
+
+      - name: Run Playwright tests
+        run: pnpm exec playwright test
+        working-directory: apps/frontend
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: apps/frontend/playwright-report/
+          retention-days: 3
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: typescript
+    defaults:
+      run:
+        shell: bash
+        working-directory: apps/frontend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "18"
+
+      - name: Install dependencies
+        run: npm install -g pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build
+        run: pnpm build
