@@ -55,16 +55,18 @@
                 - nginx_proxy_network
 
             frontend:
-              image: "unicloud-frontend:latest"
+              image: "ghcr.io/clementpnn/unicloud-frontend:latest"
               restart: always
+              container_name: frontend
               networks:
                 - nginx_proxy_network
               ports:
                 - "8081:80"
 
             backend:
-              image: "unicloud-backend:latest"
+              image: "ghcr.io/clementpnn/unicloud-backend:latest"
               restart: always
+              container_name: backend
               environment:
                 POSTGRES_USER: "{{ db_user }}"
                 POSTGRES_PASSWORD: "{{ db_password }}"
