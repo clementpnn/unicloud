@@ -15,17 +15,12 @@ func ConnectDB() *sql.DB {
 		log.Fatal("Erreur: fichier .env requis")
 	}
 
-	log.Printf("DB_HOST: %s", os.Getenv("DB_HOST"))
-	log.Printf("DB_PORT: %s", os.Getenv("DB_PORT"))
-	log.Printf("DB_USER: %s", os.Getenv("DB_USER"))
-	log.Printf("DB_NAME: %s", os.Getenv("DB_NAME"))
-
 	connStr := fmt.Sprintf(
-		"postgresql://%s:%s@%s:%s/postgres?sslmode=disable&TimeZone=Europe/Paris",
-		os.Getenv("DB_USER"),
-		os.Getenv("DB_PASSWORD"),
-		os.Getenv("DB_HOST"),
-		os.Getenv("DB_PORT"))
+		"host=db port=5432 user=%s password=%s dbname=%s sslmode=disable",
+		os.Getenv("POSTGRES_USER"),
+		os.Getenv("POSTGRES_PASSWORD"),
+		os.Getenv("POSTGRES_NAME"),
+	)
 
 	log.Printf("Connection string: %s", connStr)
 
@@ -41,7 +36,7 @@ func ConnectDB() *sql.DB {
 	return db
 }
 
-func getEnv(key, defaultValue string) string {
+func GetEnv(key, defaultValue string) string {
 	value := os.Getenv(key)
 	if value == "" {
 		return defaultValue

@@ -7,10 +7,10 @@ import (
 )
 
 type LinkHandler struct {
-	linkService *service.LinkService
+	linkService service.LinkService
 }
 
-func NewLinkHandler(linkService *service.LinkService) *LinkHandler {
+func NewLinkHandler(linkService service.LinkService) *LinkHandler {
 	return &LinkHandler{linkService: linkService}
 }
 

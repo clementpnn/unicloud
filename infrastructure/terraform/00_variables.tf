@@ -73,3 +73,17 @@ variable "mdesruets_email" {
   type        = string
   sensitive   = true
 }
+variable "db_user" {
+  type        = string
+  description = "User for the database"
+  sensitive   = true
+}
+variable "db_password" {
+  type        = string
+  description = "Password for the database"
+  sensitive   = true
+}
+variable "db_name" {
+  type        = string
+  description = "Name of the database"
+}
