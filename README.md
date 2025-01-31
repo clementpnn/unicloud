@@ -1,1 +1,186 @@
-# devops-project
+<div align="center">
+  <img alt="Home Page" src="./assets/Unicorn.png">
+</div>
+
+<h1 align="center">Unicloud</h1>
+<p align="center">
+  School Project
+</p>
+
+<p align="center">
+  <a href="#introduction"><strong>Introduction</strong></a> ·
+  <a href="#algorithm"><strong>Algorithm</strong></a> ·
+  <a href="#setting-up-locally"><strong>Setting Up Locally</strong></a> ·
+  <a href="#tech-stack"><strong>Tech Stack</strong></a> .
+  <a href="#routes"><strong>Routes</strong></a>
+</p>
+<br/>
+
+# Terraform & Ansible GCP Project
+
+This project utilizes **Terraform** to deploy an EC2 instance on AWS, followed by **Ansible** to configure the instance by installing Docker using the ```geerlingguy.docker``` Ansible role. A **Makefile** is included to simplify common Terraform commands.
+
+## Prerequisites
+
+### 1. Install Terraform
+Terraform must be installed on your machine. You can download and install it from the official site: [Terraform Downloads](https://www.terraform.io/downloads.html).
+
+### 2. Install AWS CLI
+The AWS CLI simplifies the configuration of your AWS credentials. Download and install it from the official site: [AWS CLI Downloads](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html).
+
+### 3. Configure GCP credentials
+You need to configure your GCP credentials so that Terraform can interact with GCP. Run the following command to set up your credentials:
+
+```bash
+gcloud auth login
+```
+
+### 4. Install Ansible
+Ansible is required to configure the EC2 instance after it's created. You can download and install it from the official site: [Ansible Downloads](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html).
+
+### 5. Install the Ansible role geerlingguy.docker
+This project uses the Ansible role ```geerlingguy.docker``` to install Docker on the EC2 instance. You need to install this role before running Ansible.
+
+Install the role with the following command:
+
+```bash
+ansible-galaxy install geerlingguy.docker
+```
+
+### 6. Clone the project
+Clone this repository to get started with the project:
+
+```bash
+git clone https://github.com/clementpnn/unicloud.git
+cd unicloud
+```
+
+### 7. Create a secrets.tfvars file
+Create a secrets.tfvars file in the infrastructure directory with the following variables:
+
+```bash
+ssh_public_key = ""
+
+adiarra_email   = ""
+avisage_email   = ""
+mdesruets_email = ""
+
+db_user     = ""
+db_password = ""
+db_name     = ""
+
+
+```
+
+## Project Structure
+
+```bash
+.
+├── .github
+│   └── workflows
+│       ├── cd-frontend.yml
+│       ├── cd-backend.yml
+│       ├── ci-frontend.yml
+│       └── ci-backend.yml
+├── apps
+│   ├── frontend
+│   │   ├── Dockerfile
+│   │   └── ...
+│   └── backend
+│       ├── Dockerfile
+│       └── ...
+├── infrastructure
+│   ├── terraform
+│   │   ├── 00_providers.tf
+│   │   ├── 00_variables.tf
+│   │   ├── 01_keypairs.tf
+│   │   ├── 02_networks.tf
+│   │   ├── 03_security_groups.tf
+│   │   ├── 04_instances.tf
+│   │   ├── 05_iam.tf
+│   │   ├── 06_ansible.tf
+│   │   └── secrets.tfvars
+│   ├── ansible
+│   │   └── playbook.yml
+│   └── sql
+│       └── init.sql
+├── Makefile
+├── .gitignore
+└── README.md
+```
+
+### Key files:
+```terraform/```: Contains Terraform configuration files to create the GCP instance.
+```ansible/playbook.yml```: Ansible playbook to install Docker on the GCP instance.
+```Makefile```: Simplifies the execution of common Terraform commands.
+
+## Makefile Usage
+The **Makefile** includes several commands to facilitate working with Terraform. Below is a summary of the available commands:
+
+| Command | Description |
+| --- | --- |
+| ```make all```| Initializes Terraform and applies the configuration (creates infrastructure). |
+| ```make init```| Initializes the Terraform directory (downloads plugins, configures the backend). |
+|```make apply```| Applies the Terraform plan and deploys the infrastructure. |
+|```make destroy```| Destroys all resources managed by Terraform. |
+|```make clean```| Removes locally generated Terraform files, such as state files (```.tfstate```). |
+
+### 1. Initialize Terraform
+Before you can apply or destroy infrastructure, you need to initialize Terraform to download necessary modules and plugins.
+
+Run this command:
+
+```bash
+make init
+```
+
+### 2. Apply Terraform configuration
+To create the infrastructure defined in your Terraform files (e.g., an EC2 instance), run:
+
+```bash
+make apply
+```
+
+This command automatically applies the Terraform plan and creates all specified resources without prompting for confirmation, thanks to the ```-auto-approve option```.
+
+### 3. Destroy the infrastructure
+To destroy all resources created by Terraform, run:
+
+```bash
+make destroy
+```
+
+This will remove all AWS resources associated with this configuration, such as the EC2 instance.
+
+### 4. Clean up Terraform-generated files
+If you want to clean up the state files generated by Terraform locally, run the ```clean``` command:
+
+```bash
+make clean
+```
+
+This command removes the ```terraform.tfstate```, ```terraform.tfstate.backup```, and ```.terraform directory``` where temporary files are stored.
+
+## Connecting to the Server from Your Terminal
+To connect to the EC2 server from your terminal, follow these steps:
+
+1. Ensure you have the **private SSH key** that matches the public key used when creating the EC2 instance.
+2. Identify the **public IP address** of your EC2 instance. You can obtain this from the Terraform output or the AWS console.
+3. Use the following SSH command to connect to the server:
+
+```bash
+ssh -i "~/.ssh/id_rsa" admin@<public_ip>
+```
+
+- ```-i "~/.ssh/id_rsa"```: This specifies the path to the private key (```id_rsa```). Adjust the path if your private key is stored elsewhere.
+- ```admin@<public_ip>```: This specifies the user (```admin``` for Debian-based images, adjust if you're using a different distribution) and the public IP address of your EC2 instance.
+
+Once connected, you can run any commands on the server, including verifying Docker installation.
+
+---
+
+If you get an error message like ```Permission denied (publickey).```, you need to change the permissions of the private key file:
+
+```bash
+chmod 400 ~/.ssh/id_rsa
+```
