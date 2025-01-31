@@ -11,7 +11,6 @@ import (
 )
 
 func TestCreateLink(t *testing.T) {
-	// Create mock database
 	mockDB, mock, err := sqlmock.New()
 	assert.NoError(t, err)
 	defer mockDB.Close()
@@ -24,7 +23,6 @@ func TestCreateLink(t *testing.T) {
 		CreatedAt: time.Now(),
 	}
 
-	// Expect query execution
 	mock.ExpectExec(`INSERT INTO links \(id, long_url, short_url, created_at\) VALUES \(\$1, \$2, \$3, \$4\)`).
 		WithArgs(link.ID, link.LongURL, link.ShortURL, link.CreatedAt).
 		WillReturnResult(sqlmock.NewResult(1, 1))
@@ -48,7 +46,6 @@ func TestGetByShortURL(t *testing.T) {
 		CreatedAt: time.Now(),
 	}
 
-	// Expect query execution
 	rows := sqlmock.NewRows([]string{"id", "long_url", "short_url", "created_at"}).
 		AddRow(expectedLink.ID, expectedLink.LongURL, expectedLink.ShortURL, expectedLink.CreatedAt)
 	mock.ExpectQuery(`SELECT id, long_url, short_url, created_at FROM links WHERE short_url = \$1`).
